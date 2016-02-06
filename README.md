@@ -3,7 +3,7 @@ A Python library that provides an api to search and get links from Books,Magazin
 
 Requirements:
 -------------
-* Python 3
+* Python 2/3
 * Grab library and it's dependencies.
 
 Installation:
