@@ -24,7 +24,7 @@ Then the results are something like this (but... without the crazyness :P real l
                 "series":"Library of New Guy Studies volume 420",
                 "title":"Dat perfect 5/7 Title !",
                 "isbn":"123456",
-                "edition":"[1 ed.],
+                "edition":"[1 ed.]",
                 "publisher":"WHo knows? Me no!",
                 "year":"420",
                 "pages":"420",
