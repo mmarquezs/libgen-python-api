@@ -6,6 +6,12 @@ Requirements:
 * Python 3
 * Grab library and it's dependencies.
 
+Installation:
+-------------
+Two options:
+* Clone this repo and use "python setup.py install"
+* Use pip, "pip install libgenapi"
+
 Example of usage:
 -----------------
 
