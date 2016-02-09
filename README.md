@@ -3,7 +3,7 @@ A Python library that provides an api to search and get links from Books,Magazin
 
 Requirements:
 -------------
-* Python 3
+* Python 3/2
 * Grab library and it's dependencies.
 
 Installation:
@@ -29,7 +29,7 @@ Then the results are something like this (but... without the crazyness :P real l
                 "author":"Dat Guy",
                 "series":"Library of New Guy Studies volume 420",
                 "title":"Dat perfect 5/7 Title !",
-                "isbn":"123456",
+                "isbn":[123456],
                 "edition":"[1 ed.]",
                 "publisher":"WHo knows? Me no!",
                 "year":"420",
