@@ -27,7 +27,7 @@ class Libgenapi(object):
         """
         TODO: 
         Add documentation
-        Search multiple pages untile the numberResults is meet or the end.
+        DONE -> Search multiple pages untile the numberResults is meet or the end.
         Check for strange encodings, other langauges chinese,etc..
         Simplify,simplify,simply...For exemple the book dictionary
         should start with all keys with an empty string.
@@ -92,7 +92,8 @@ class Libgenapi(object):
                                 book["isbn"]=[]
                                 # book["isbn"]=[]
                                 for x in element.text().split(","):
-                                    book["isbn"]+=[regIsbn.search(x).group(0)]
+                                    if regIsbn.search(x)!=None:
+                                        book["isbn"]+=[regIsbn.search(x).group(0)]
                                     # for isbn in regIsbn.seach(x):
                                     #     book["isbn"]+=[isbn]
                             elif regEdition.search(element.text())!=None:
