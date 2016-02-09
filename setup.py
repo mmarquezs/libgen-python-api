@@ -12,7 +12,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='libgenapi',
-    version='1.1.0',
+    version='1.1.1',
     description='Library to search on Library genesis',
     long_description=long_description,
     url='https://github.com/mmarquezs/libgen-python-api/',
