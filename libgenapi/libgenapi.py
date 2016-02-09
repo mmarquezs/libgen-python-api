@@ -4,6 +4,7 @@ import re
 import math
 import urllib
 import sys
+import weblib
 if sys.version_info[0]>3:
     import urllib.parse
 
@@ -34,15 +35,15 @@ class Libgenapi(object):
         last=len(self.mirrors)-1
         if last==-1:
             raise MissingMirrorsError("There are no mirrors!")
+        if type(self.mirrors)!=type([]):
+            self.mirrors=[self.mirrors]
         for i,mirror in enumerate(self.mirrors):
             try:
                 if sys.version_info[0]<3:
                     url=mirror+"/search.php?"+urllib.urlencode({"req":searchTerm})
-                    print(url)
                     self.g.go(url)
                 else:
-                    url=mirror+"/search.php?"+urllib.parse.urldefrag({"req":searchTerm})
-                    print(url)
+                    url=mirror+"/search.php?"+urllib.parse.urlencode({"req":searchTerm})
                     self.g.go(url)
                 break
             except grab.GrabError as e:
@@ -54,23 +55,29 @@ class Libgenapi(object):
         i=0
         dKeys=["author","series","title","edition","isbn","publisher","year","pages","language","size","extension","mirrors"]
         for result in self.g.doc.select('//body/table[3]/tr[position()>1]/td[position()>1 and position()<=10]'):
-            if i==11:            # Getting mirror links
+            if dKeys[i]=="mirrors":            # Getting mirror links
                 book[dKeys[i]]=[x.text() for x in result.select("a/@href")]
             elif i==1:          # Getting title,isbn,series,edition
                 try:            # Dammit... There is series,isbn or edition or all, now we have to separate it...
-                    greenText=result.select("a/font")
+                    greenText=result.select("a/font")  # Cheking if there is any "green" text. If there is it means there is the title and something else.
                     book["title"]=result.select("a/text()").text()
-                    regIsbn=re.compile(r'([A-z])')  # There isn't letters? Then is an ISBN,I guess?¿? This would fail if there is a series with only numbers..
+                    # regIsbn=re.compile(r'([A-z])')  # There isn't letters? Then is an ISBN,I guess?¿? This would fail if there is a series with only numbers..
+                    regIsbn=re.compile(r"(ISBN[-]*(1[03])*[ ]*(: ){0,1})*(([0-9Xx][- ]*){13}|([0-9Xx][- ]*){10})")  # A regex I found for isbn, not sure if perfect but better than mine. 
                     regEdition=re.compile(r'(\[[0-9] ed\.\])')
                     for element in greenText:
-                        if regIsbn.search(element.text())==None:
-                            book["isbn"]=element.text()
-                        elif regEdition.search(element.text())!=None:
+                        if regIsbn.search(element.text())!=None:
+                            book["isbn"]=[]
+                            # book["isbn"]=[]
+                            for x in element.text().split(","):
+                                book["isbn"]+=[regIsbn.search(x).group(0)]
+                                # for isbn in regIsbn.seach(x):
+                                #     book["isbn"]+=[isbn]
+                        elif regEdition.findall(element.text())!=None:
                             book["edition"]=element.text()
                         else:
                             book["series"]=element.text()
                     i=i+3
-                except:         #Easy, there is just the title. 
+                except weblib.error.DataNotFound:         #Easy, there is just the title. 
                     book["series"]=""  # Series Empty
                     i+=1
                     book["title"]=result.text()  # Title
