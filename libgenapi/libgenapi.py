@@ -59,8 +59,8 @@ class Libgenapi(object):
                 pass
         searchResult=[]
         nbooks=int(re.search(r'([0-9]*) books',self.g.doc.select("/html/body/table[2]/tr/td[1]/font").text()).group(1))
-        pages=int(math.ceil(nbooks/25))
-        pagesToLoad=int(math.ceil(numberResults/25))
+        pages=int(math.ceil(nbooks/25.0))
+        pagesToLoad=int(math.ceil(numberResults/25.0))
         if pagesToLoad>pages:
             pagesToLoad=pages
         book={}
