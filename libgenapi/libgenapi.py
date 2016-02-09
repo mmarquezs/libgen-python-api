@@ -6,6 +6,9 @@ import urllib
 import sys
 import weblib
 import math
+import time
+import random
+
 
 if sys.version_info[0]>3:
     import urllib.parse
@@ -20,7 +23,7 @@ class Libgenapi(object):
         self.mirrors=mirrors
     def setMirrors(self,listMirrors):
         self.mirrors=listMirrors
-    def search(self,searchTerm,numberResults=25):
+    def search(self,searchTerm,numberResults=25,bar=False):
         """
         TODO: 
         Add documentation
@@ -33,7 +36,6 @@ class Libgenapi(object):
         Add parameters to the search apart from the searchTerm
         
         """
-        error=None
         last=len(self.mirrors)-1
         if last==-1:
             raise MissingMirrorsError("There are no mirrors!")
@@ -113,5 +115,7 @@ class Libgenapi(object):
                     searchResult+=[book]
                     i=0
                     book={}
+            if page != pagesToLoad:
+                time.sleep(random.randint(250,1000)/1000.0) # Random delay because if you ask a lot of pages,your ip might get blocked.
         return searchResult
         
