@@ -1,5 +1,12 @@
+# -*- coding: utf-8 -*-
 import grab
 import re
+import math
+import urllib
+import sys
+if sys.version_info[0]>3:
+    import urllib.parse
+
 class MissingMirrorsError(Exception):
     pass
 class MirrorsNotResolving(Exception):
@@ -29,7 +36,14 @@ class Libgenapi(object):
             raise MissingMirrorsError("There are no mirrors!")
         for i,mirror in enumerate(self.mirrors):
             try:
-                self.g.go(mirror+"/search.php?req="+searchTerm)
+                if sys.version_info[0]<3:
+                    url=mirror+"/search.php?"+urllib.urlencode({"req":searchTerm})
+                    print(url)
+                    self.g.go(url)
+                else:
+                    url=mirror+"/search.php?"+urllib.parse.urldefrag({"req":searchTerm})
+                    print(url)
+                    self.g.go(url)
                 break
             except grab.GrabError as e:
                 if i==last:
@@ -41,13 +55,12 @@ class Libgenapi(object):
         dKeys=["author","series","title","edition","isbn","publisher","year","pages","language","size","extension","mirrors"]
         for result in self.g.doc.select('//body/table[3]/tr[position()>1]/td[position()>1 and position()<=10]'):
             if i==11:            # Getting mirror links
-                #print(type(result))
                 book[dKeys[i]]=[x.text() for x in result.select("a/@href")]
             elif i==1:          # Getting title,isbn,series,edition
                 try:            # Dammit... There is series,isbn or edition or all, now we have to separate it...
                     greenText=result.select("a/font")
                     book["title"]=result.select("a/text()").text()
-                    regIsbn=re.compile(r'([A-z])')
+                    regIsbn=re.compile(r'([A-z])')  # There isn't letters? Then is an ISBN,I guess?¿? This would fail if there is a series with only numbers..
                     regEdition=re.compile(r'(\[[0-9] ed\.\])')
                     for element in greenText:
                         if regIsbn.search(element.text())==None:
