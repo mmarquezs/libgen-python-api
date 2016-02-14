@@ -8,7 +8,6 @@ import weblib
 import time
 import random
 
-
 if sys.version_info[0]>3:
     import urllib.parse
 
@@ -17,7 +16,7 @@ class MissingMirrorsError(Exception):
 class MirrorsNotResolving(Exception):
    pass 
 class Libgenapi(object):
-    def __init__(self,mirrors=[]):
+    def __init__(self,mirrors=None):
         self.g=grab.Grab()
         self.mirrors=mirrors
     def setMirrors(self,listMirrors):
@@ -34,9 +33,9 @@ class Libgenapi(object):
         Make a example terminal app that uses it
         Add parameters to the search apart from the searchTerm
         """
-        last=len(self.mirrors)-1
-        if last==-1:
+        if self.mirrors==None:
             raise MissingMirrorsError("There are no mirrors!")
+        last=len(self.mirrors)-1
         if type(self.mirrors)!=type([]):
             self.mirrors=[self.mirrors]
         url=""
