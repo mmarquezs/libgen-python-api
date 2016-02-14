@@ -1,27 +1,39 @@
 # -*- coding: utf-8 -*-
-import grab
-import re
-import math
-import urllib
-import sys
-import weblib
+"""
+Library to search in Library Genesis
+"""
+
 import time
 import random
-
-if sys.version_info[0]>3:
+import re
+import math
+import sys
+import urllib
+if sys.version_info[0] > 3:
     import urllib.parse
+import grab
+import weblib
 
 class MissingMirrorsError(Exception):
+    """
+    Error shown when there are no mirrors.
+    """
     pass
-class MirrorsNotResolving(Exception):
-   pass 
+class MirrorsNotResolvingError(Exception):
+    """
+    Error shown when none of the mirrors are resolving.
+    """
+    pass 
 class Libgenapi(object):
+    """
+    Main class representing the library
+    """
     def __init__(self,mirrors=None):
         self.g=grab.Grab()
         self.mirrors=mirrors
-    def setMirrors(self,listMirrors):
+    def SetMirrors(self, listMirrors):
         self.mirrors=listMirrors
-    def search(self,searchTerm,numberResults=25,bar=False):
+    def search(self,searchTerm,numberResults=25):
         """
         TODO: 
         Add documentation
@@ -38,8 +50,8 @@ class Libgenapi(object):
         last=len(self.mirrors)-1
         if type(self.mirrors)!=type([]):
             self.mirrors=[self.mirrors]
-        url=""
-        selectedMirror=""
+            url=""
+            selectedMirror=""
         for i,mirror in enumerate(self.mirrors):
             try:
                 if sys.version_info[0]<3:
@@ -48,21 +60,21 @@ class Libgenapi(object):
                 else:
                     url=mirror+"/search.php?"+urllib.parse.urlencode({"req":searchTerm})
                     self.g.go(url)
-                selectedMirror=mirror
+                    selectedMirror=mirror
                 break
             except grab.GrabError as e:
                 if i==last:
-                    raise MirrorsNotResolving("None of the mirrors are resolving, check if they are correct or you have connection!")
+                    raise MirrorsNotResolvingError("None of the mirrors are resolving, check if they are correct or you have connection!")
                 pass
-        searchResult=[]
-        nbooks=int(re.search(r'([0-9]*) books',self.g.doc.select("/html/body/table[2]/tr/td[1]/font").text()).group(1))
-        pages=int(math.ceil(nbooks/25.0))
-        pagesToLoad=int(math.ceil(numberResults/25.0))
+            searchResult=[]
+            nbooks=int(re.search(r'([0-9]*) books',self.g.doc.select("/html/body/table[2]/tr/td[1]/font").text()).group(1))
+            pages=int(math.ceil(nbooks/25.0))
+            pagesToLoad=int(math.ceil(numberResults/25.0))
         if pagesToLoad>pages:
             pagesToLoad=pages
-        book={}
-        i=0
-        dKeys=["author","series","title","edition","isbn","publisher","year","pages","language","size","extension","mirrors"]
+            book={}
+            i=0
+            dKeys=["author","series","title","edition","isbn","publisher","year","pages","language","size","extension","mirrors"]
         for page in range(1,pagesToLoad+1):
             if len(searchResult)>numberResults:
                 break
@@ -91,13 +103,13 @@ class Libgenapi(object):
                                 for x in element.text().split(","):
                                     if regIsbn.search(x)!=None:
                                         book["isbn"]+=[regIsbn.search(x).group(0)]
-                                    # for isbn in regIsbn.seach(x):
-                                    #     book["isbn"]+=[isbn]
+                                        # for isbn in regIsbn.seach(x):
+                                        #     book["isbn"]+=[isbn]
                             elif regEdition.search(element.text())!=None:
                                 book["edition"]=element.text()
                             else:
                                 book["series"]=element.text()
-                        i=i+3
+                                i=i+3
                     except weblib.error.DataNotFound:         #Easy, there is just the title. 
                         book["series"]=""  # Series Empty
                         i+=1
@@ -108,7 +120,7 @@ class Libgenapi(object):
                         book["isbn"]="[]"  # ISBN empty
                 else:
                     book[dKeys[i]]=result.text()
-                i+=1
+                    i+=1
                 if i>11:
                     searchResult+=[book]
                     i=0
@@ -116,4 +128,3 @@ class Libgenapi(object):
             if page != pagesToLoad:
                 time.sleep(random.randint(250,1000)/1000.0) # Random delay because if you ask a lot of pages,your ip might get blocked.
         return searchResult
-        
