@@ -5,7 +5,6 @@ import math
 import urllib
 import sys
 import weblib
-import math
 import time
 import random
 
@@ -34,7 +33,6 @@ class Libgenapi(object):
         Change the actual output to json?
         Make a example terminal app that uses it
         Add parameters to the search apart from the searchTerm
-        
         """
         last=len(self.mirrors)-1
         if last==-1:
