@@ -121,6 +121,7 @@ class Libgenapi(object):
         Make a example terminal app that uses it
         STARTED -> Add parameters to the search apart from the search_term
         """
+        self.__choose_mirror()
         url = self.__selected_mirror+"/search.php?"+urllib.parse.urlencode({"req":search_term})
         search_result = []
         nbooks = re.search(r'([0-9]*) books',
