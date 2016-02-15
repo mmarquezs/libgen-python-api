@@ -8,3 +8,4 @@
 /libgenapi.egg-info/requires.txt
 /tests/#*#
 /libgenapi.egg-info/*
+dist/*
