@@ -44,3 +44,8 @@ Then the results are something like this (but... without the crazyness :P real l
                          ]
             }
         ]
+
+Other examples:
+---------------
+You can make a quick command to search using an alias, for example in zsh you can add this to your .zshrc:
+> alias lgen="python -c 'import sys;import libgenapi;l=libgenapi.Libgenapi(\"http://[INSERTDOMAINHERE]/\");print(l.search(sys.argv[1]))'"
