@@ -68,11 +68,12 @@ class Libgenapi(object):
         d_keys = ["author", "series_title_edition_and_isbn", "publisher", "year", "pages",
                   "language", "size", "extension", "mirrors"]
         parse_result = []
-        for result in self.grabber.doc.select('//body/table[3]/tr[position()>1]/td[position()>1',
+        for result in self.grabber.doc.select('//body/table[3]/tr[position()>1]/td[position()>1'+ \
                                               'and position()<=10]'):
             # if len(search_result)>=number_results:
             #     break
-            if i > 11:
+            if i > 8:
+                print(book)
                 parse_result += [book]
                 i = 0
                 book = {"author":None, "series":None, "title":None, "edition":None, "isbn":None,
@@ -91,7 +92,7 @@ class Libgenapi(object):
                     green_text = result.select("a/font")
                     book["title"] = result.select("a/text()").text()
                     # A regex I found for isbn, not sure if perfect but better than mine.
-                    reg_isbn = re.compile(r"(ISBN[-]*(1[03])*[ ]*(: ){0,1})*",
+                    reg_isbn = re.compile(r"(ISBN[-]*(1[03])*[ ]*(: ){0,1})*"+ \
                                           "(([0-9Xx][- ]*){13}|([0-9Xx][- ]*){10})")
                     reg_edition = re.compile(r'(\[[0-9] ed\.\])')
                     for element in green_text:
@@ -107,7 +108,7 @@ class Libgenapi(object):
                     book["title"] = result.text()  # Title found
             else:
                 book[d_keys[i]] = result.text()
-                i += 1
+            i += 1
         return parse_result
     def search(self, search_term, number_results=25):
         """
@@ -122,7 +123,13 @@ class Libgenapi(object):
         STARTED -> Add parameters to the search apart from the search_term
         """
         self.__choose_mirror()
-        url = self.__selected_mirror+"/search.php?"+urllib.parse.urlencode({"req":search_term})
+        if sys.version_info[0] < 3:
+            url = self.__selected_mirror+"/search.php?"+ \
+                    urllib.urlencode({"req":search_term})
+        else:
+            url = self.__selected_mirror+"/search.php?"+ \
+                    urllib.parse.urlencode({"req":search_term})
+        self.grabber.go(url)
         search_result = []
         nbooks = re.search(r'([0-9]*) books',
                            self.grabber.doc.select("/html/body/table[2]/tr/td[1]/font").text())
