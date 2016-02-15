@@ -43,6 +43,8 @@ class Libgenapi(object):
             return
         if self.mirrors is None:
             raise MissingMirrorsError("There are no mirrors!")
+        if isinstance(self.mirrors, str):
+            self.mirrors = [self.mirrors]
         last = len(self.mirrors)-1
         for i, mirror in enumerate(self.mirrors):
             try:
@@ -119,8 +121,6 @@ class Libgenapi(object):
         Make a example terminal app that uses it
         STARTED -> Add parameters to the search apart from the search_term
         """
-        if isinstance(self.mirrors, str):
-            self.mirrors = [self.mirrors]
         url = self.__selected_mirror+"/search.php?"+urllib.parse.urlencode({"req":search_term})
         search_result = []
         nbooks = re.search(r'([0-9]*) books',
