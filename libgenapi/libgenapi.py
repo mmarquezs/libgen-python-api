@@ -73,7 +73,6 @@ class Libgenapi(object):
             # if len(search_result)>=number_results:
             #     break
             if i > 8:
-                print(book)
                 parse_result += [book]
                 i = 0
                 book = {"author":None, "series":None, "title":None, "edition":None, "isbn":None,
