@@ -72,13 +72,14 @@ class Libgenapi(object):
                                               'and position()<=10]'):
             # if len(search_result)>=number_results:
             #     break
-            if i > 8:
+                                                      # 'and position()<=10]')])
+            if i > len(d_keys)-1:
                 parse_result += [book]
                 i = 0
                 book = {"author":None, "series":None, "title":None, "edition":None, "isbn":None,
                         "publisher":None, "year":None, "pages":None, "language":None, "size":None,
                         "extension":None, "mirrors":None}
-            elif d_keys[i] == "mirrors":            # Getting mirror links
+            if d_keys[i] == "mirrors":            # Getting mirror links
                 book[d_keys[i]] = [x.text() for x in result.select("a/@href")]
             elif d_keys[i] == "series_title_edition_and_isbn": # Getting title,isbn,series,edition.
                 try:
@@ -108,8 +109,9 @@ class Libgenapi(object):
             else:
                 book[d_keys[i]] = result.text()
             i += 1
+        parse_result += [book]
         return parse_result
-    def search(self, search_term, number_results=25):
+    def search(self, search_term, column="title", number_results=25):
         """
         TODO:
         Add documentation
@@ -121,13 +123,14 @@ class Libgenapi(object):
         Make a example terminal app that uses it
         STARTED -> Add parameters to the search apart from the search_term
         """
+        request={"req":search_term,"column":column}
         self.__choose_mirror()
         if sys.version_info[0] < 3:
             url = self.__selected_mirror+"/search.php?"+ \
-                    urllib.urlencode({"req":search_term})
+                    urllib.urlencode(request)
         else:
             url = self.__selected_mirror+"/search.php?"+ \
-                    urllib.parse.urlencode({"req":search_term})
+                    urllib.parse.urlencode(request)
         self.grabber.go(url)
         search_result = []
         nbooks = re.search(r'([0-9]*) books',
@@ -141,14 +144,13 @@ class Libgenapi(object):
             if len(search_result) > number_results:  # Check if we got all the results
                 break
             url = ""
+            request.update({"page":page})
             if sys.version_info[0] < 3:
                 url = self.__selected_mirror+"/search.php?"+ \
-                      urllib.urlencode({"req":search_term,
-                                        "page":page})
+                      urllib.urlencode(request)
             else:
                 url = self.__selected_mirror+"/search.php?"+ \
-                      urllib.parse.urlencode({"req":search_term,
-                                              "page":page})
+                      urllib.parse.urlencode(request)
             self.grabber.go(url)
             search_result += self.__parse_books()
             if page != pages_to_load:
