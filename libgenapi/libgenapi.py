@@ -156,4 +156,4 @@ class Libgenapi(object):
             if page != pages_to_load:
                 # Random delay because if you ask a lot of pages,your ip might get blocked.
                 time.sleep(random.randint(250, 1000)/1000.0)
-            return search_result[:number_results]
+        return search_result[:number_results]
