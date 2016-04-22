@@ -83,6 +83,7 @@ class Libgenapi(object):
                         book["mirrors"] = [mirror.text()]
                     else:
                         book["mirrors"] += [mirror.text()]
+                    book["mirrors"][-1]=book["mirrors"][-1].replace("../",self.__selected_mirror+"/")
             elif d_keys[i] == "series_title_edition_and_isbn": # Getting title,isbn,series,edition.
                 try:
                     # If there isn't an exception there is series,isbn or edition or all,
