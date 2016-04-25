@@ -44,6 +44,14 @@ Then the results are something like this (but... without the crazyness :P real l
                          ]
             }
         ]
+        
+You can also choose the column to search like this:
+
+```python
+l.search("93438924","identifier") # Identifier is ISBN
+l.search("Michael","author")
+...
+```
 
 Other examples:
 ---------------
