@@ -116,15 +116,14 @@ class Libgenapi(object):
         return parse_result
     def search(self, search_term, column="title", number_results=25):
         """
-        TODO:
-        Add documentation
+        TODO: Add documentation
         DONE -> Search multiple pages untile the number_results is meet or the end.
-        Check for strange encodings, other langauges chinese,etc..
-        Simplify,simplify,simply...For exemple the book dictionary
-        should start with all keys with an empty string.
-        Change the actual output to json?
-        Make a example terminal app that uses it
-        STARTED -> Add parameters to the search apart from the search_term
+        TODO: Check for strange encodings, other langauges chinese,etc..
+        TODO: Simplify,simplify,simply...For exemple the book dictionary should
+        start with all keys with an empty string.
+        TODO: Change the actual output to json?
+        TODO: Make a example terminal app that uses it
+        TODO: STARTED -> Add parameters to the search apart from the search_term
         """
         request={"req":search_term,"column":column}
         self.__choose_mirror()
