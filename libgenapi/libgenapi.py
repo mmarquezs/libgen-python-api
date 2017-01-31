@@ -138,7 +138,8 @@ class Libgenapi(object):
     class __Scimag(object):
         def __init__(self,url):
             self.url=url
-        def __parse(self,doc):
+        def __parse(self,g):
+            doc = g.doc
             article = {"doi":None, "author":None, "article":None, "doi_owner":None, "journal":None,
                        "issue":{"year":None, "month":None, "day":None, "volume":None, "issue":None, "first_page":None, "last_page":None}, "issn":None, "size":None, "mirrors":[]}
             i = 0
@@ -154,7 +155,7 @@ class Libgenapi(object):
                     article["doi"]=result.select("table/tr[1]/td[2]/nobr").text()
                     mirrors = result.select("table/tr//a/@href")
                     for mirror in mirrors:
-                        article["mirrors"] += [mirror.text()]
+                        article["mirrors"] += [g.make_url_absolute(mirror.text())]
                 elif d_keys[i] == "issn":
                     article["issn"] = result.select("text()").node_list()
                 elif d_keys[i] == "issue":
@@ -204,7 +205,7 @@ class Libgenapi(object):
                     url = self.url+"?"+ \
                         urllib.parse.urlencode(request)
                 g.go(url)
-                search_result += self.__parse(g.doc)
+                search_result += self.__parse(g)
                 if page != pages_to_load:
                     # Random delay because if you ask a lot of pages,your ip might get blocked.
                     time.sleep(random.randint(250, 1000)/1000.0)
