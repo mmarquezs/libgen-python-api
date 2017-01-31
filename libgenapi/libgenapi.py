@@ -136,31 +136,36 @@ class Libgenapi(object):
 
 
     class __Scimag(object):
-        # http://libgen.io/scimag/index.php?s=DOI_or_PMID_or_Author_%2B_Article&journalid=title_or_issn&v=Volume_or_year&i=Issue&p=Pages&redirect=1
         def __init__(self,url):
             self.url=url
-
         def __parse(self,doc):
             article = {"doi":None, "author":None, "article":None, "doi_owner":None, "journal":None,
-                       "issue":None, "issn":None, "size":None, "mirrors":[]}
+                       "issue":{"year":None, "month":None, "day":None, "volume":None, "issue":None, "first_page":None, "last_page":None}, "issn":None, "size":None, "mirrors":[]}
             i = 0
             d_keys = ["doi_and_mirrors", "author", "article", "doi_owner", "journal", "issue", "issn", "size"]
             parse_result = []
-            #/html/body/table[2]/tbody/tr[1]
             for result in doc.select('/html/body/table[2]/tr/td[position()<last()]'):
                 if i > len(d_keys)-1:
                     parse_result += [article]
                     i = 0
                     article = {"doi":None, "author":None, "article":None, "doi_owner":None, "journal":None,
-                               "issue":None, "issn":None, "size":None, "mirrors":[]}
+                       "issue":{"year":None, "month":None, "day":None, "volume":None, "issue":None, "first_page":None, "last_page":None}, "issn":None, "size":None, "mirrors":[]}
                 if d_keys[i] == "doi_and_mirrors":            # Getting doi and mirrors links
-                    #/table/tbody/tr[1]/td[2]/nobr
                     article["doi"]=result.select("table/tr[1]/td[2]/nobr").text()
                     mirrors = result.select("table/tr//a/@href")
                     for mirror in mirrors:
                         article["mirrors"] += [mirror.text()]
                 elif d_keys[i] == "issn":
                     article["issn"] = result.select("text()").node_list()
+                elif d_keys[i] == "issue":
+                    temp = [x.split(":")[1] for x in result.select("text()").node_list()]
+                    article["issue"]["year"] = temp[0]
+                    article["issue"]["month"] = temp[1]
+                    article["issue"]["day"] = temp[2]
+                    article["issue"]["volume"] = temp[3]
+                    article["issue"]["issue"] = temp[4]
+                    article["issue"]["first_page"] = temp[5]
+                    article["issue"]["last_page"] = temp[6]
                 else:
                     article[d_keys[i]] = result.text()
                 i += 1
