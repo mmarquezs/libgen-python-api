@@ -15,6 +15,8 @@ import grab
 import weblib
 import warnings
 
+
+
 class MissingMirrorsError(Exception):
     """
     Error shown when there are no mirrors.
@@ -36,7 +38,8 @@ class Libgenapi(object):
     start with all keys with an empty string.
     TODO: Change the actual output to json?
     TODO: Make a example terminal app that uses it
-    TODO: STARTED -> Add parameters to the search apart from the search_term
+    DONE: STARTED -> Add parameters to the search apart from the search_term
+    TODO: Reuse code between the different sections (LibGen,Scientific articles, Fiction,etc..)
     """
 
     class __Libgen(object):
@@ -212,6 +215,84 @@ class Libgenapi(object):
             return search_result[:number_results]
 
 
+    class __Fiction(object):
+        def __init__(self,url):
+            self.url=url
+        def __parse(self,g):
+            doc = g.doc
+            book = {"author":None, "series":None, "title":None, "language":None,
+                        "libgenID":None, "size":None, "fileType":None, "timeAdded":None, "mirrors":[]}
+            i = 0
+            d_keys = ["author", "series", "title", "language", "libgenID_size_fileType_timeAdded_mirrors"]
+            parse_result = []
+            for result in doc.select('/html/body/table[2]/tr/td'):
+                # print(result.text())
+                if i > len(d_keys)-1:
+                    parse_result += [book]
+                    i = 0
+                    book = {"author":None, "series":None, "title":None, "language":None,
+                        "libgenID":None, "size":None, "timeAdded":None, "mirrors":[]}
+                if d_keys[i] == "libgenID_size_fileType_timeAdded_mirrors":            # Getting Libgen Id, size, fileType, time Added and mirror links.
+                    mirrors = result.select("div/a/@href")
+                    for mirror in mirrors:
+                        book["mirrors"] += [g.make_url_absolute(mirror.text())]
+                    re_libgenID_timeAdded = re.compile(r".*libgen ID:(.*);.*Timeadded: (.*)$")
+                    data = result.select("div/a/@title")[0].text()
+                    data = re_libgenID_timeAdded.search(data)
+                    book["libgenID"] = data.group(1)
+                    book["timeAdded"] = data.group(2)
+                    data = result.select("div/a")[0]
+                    data = data.text()
+                    re_fileType_size = re.compile(r"(.*)\((.*)\)")
+                    data = re_fileType_size.search(data)
+                    book["fileType"] = data.group(1)
+                    book["size"] = data.group(2)
+                else:
+                    book[d_keys[i]] = result.text()
+                i += 1
+            parse_result += [book]
+            return parse_result
+
+        def search(self, search_term="", pages="", number_results=25 ):
+            # TODO: Add missing search parameters.
+            g = grab.Grab()
+            request={"s":search_term, "p":pages}
+            if sys.version_info[0] < 3:
+                url = self.url+"?"+ \
+                        urllib.urlencode(request)
+            else:
+                url = self.url+"?"+ \
+                        urllib.parse.urlencode(request)
+            g.go(url)
+            search_result = []
+            #body > font:nth-child(7) Displayed first  100  results 
+            #body > font:nth-child(7) Found 1 results
+            nresults = re.search(r'([0-9]*) results',
+                                 g.doc.select("/html/body/font[1]").one().text())
+
+            nresults = int(nresults.group(1))
+            pages_to_load = int(math.ceil(number_results/25.0)) # Pages needed to be loaded
+            # Check if the pages needed to be loaded are more than the pages available
+            if pages_to_load > int(math.ceil(nresults/25.0)):
+                pages_to_load = int(math.ceil(nresults/25.0))
+            for page in range(1, pages_to_load+1):
+                if len(search_result) > number_results:  # Check if we got all the results
+                    break
+                url = ""
+                request.update({"page":page})
+                if sys.version_info[0] < 3:
+                    url = self.url+"?"+ \
+                        urllib.urlencode(request)
+                else:
+                    url = self.url+"?"+ \
+                        urllib.parse.urlencode(request)
+                g.go(url)
+                search_result += self.__parse(g)
+                if page != pages_to_load:
+                    # Random delay because if you ask a lot of pages,your ip might get blocked.
+                    time.sleep(random.randint(250, 1000)/1000.0)
+            return search_result[:number_results]
+
     def __init__(self, mirrors=None):
         self.mirrors = mirrors
         self.__selected_mirror = None
@@ -251,6 +332,8 @@ class Libgenapi(object):
                         self.libgen = self.__Libgen(g.make_url_absolute(category.getnext().attrib["href"]))
                     elif category.attrib["value"] == "scimag":
                         self.scimag = self.__Scimag(g.make_url_absolute(category.getnext().attrib["href"]))
+                    elif category.attrib["value"] == "fiction":
+                        self.fiction = self.__Fiction(g.make_url_absolute(category.getnext().attrib["href"]))
                 break
             except grab.GrabError:
                 if i == last:
