@@ -16,7 +16,6 @@ import weblib
 import warnings
 
 
-
 class MissingMirrorsError(Exception):
     """
     Error shown when there are no mirrors.
@@ -39,7 +38,7 @@ class Libgenapi(object):
     TODO: Change the actual output to json?
     TODO: Make a example terminal app that uses it
     DONE: STARTED -> Add parameters to the search apart from the search_term
-    TODO: Reuse code between the different sections (LibGen,Scientific articles, Fiction,etc..)
+    TODO: Remove duplicate code. Reuse code between the different sections (LibGen,Scientific articles, Fiction,etc..).
     """
 
     class __Libgen(object):
@@ -293,6 +292,87 @@ class Libgenapi(object):
                     time.sleep(random.randint(250, 1000)/1000.0)
             return search_result[:number_results]
 
+
+    class __Comics(object):
+        def __init__(self,url):
+            self.url=url
+        def __parse(self,g):
+            doc = g.doc
+            comic = {"cover":None, "mirrors":[], "title":None, "size":None, "filetype":None,
+                        "dateAdded":None, "scanDpi":None, "scanPixels": None, "pages_nfiles": None, "pages_npictures":None, "comicsDOTorg":None }
+            i = 0
+            d_keys = ["cover", "mirrors", "http_mirror_and_title", "size_filetype", "dateAdded","scanDpi_and_scanPixels","pages","comicsDOTorg" ]
+            parse_result = []
+            for result in doc.select('/html/body/table[2]/tr/td'):
+                # print(result.text())
+                if i > len(d_keys)-1:
+                    parse_result += [comic]
+                    i = 0
+                    comic = {"cover":None, "mirrors":[], "title":None, "size":None, "filetype":None,
+                             "dateAdded":None, "scanDpi":None, "scanPixels": None, "pages_nfiles": None, "pages_npictures":None, "comicsDOTorg":None }
+                if d_keys[i] == "mirrors":            # Getting mirrors.
+                    mirrors = result.select("font/a/@href")
+                    for mirror in mirrors:
+                        comic["mirrors"] += [g.make_url_absolute(mirror.text())]
+                elif d_keys[i] == "http_mirror_and_title":            # Getting http mirror link and title.
+                    http_mirror = result.select("font/a/@href")[0].text()
+                    comic["mirrors"] += [http_mirror]
+                    comic["title"] = result.select("text()").text()
+                elif d_keys[i] == "size_filetype":            # Getting size and filetype.
+                    comic["size"] = result.select("text()[1]").text()
+                    comic["filetype"] = result.select("text()[2]").text()
+                elif d_keys[i] == "scanDpi_and_scanPixels":            # Getting scan size in pixels and scan dpi.
+                    comic["scanPixels"] = result.select("font/a")[0].text()
+                    comic["scanDpi"] = result.select("font/a")[2].text()
+                elif d_keys[i] == "cover":            # Gettin
+                    comic["cover"] = g.make_url_absolute(result.select("a/img/@src").text())
+                elif d_keys[i] == "pages":            # Getting pages info.
+                    comic["pages_nfiles"] = result.select("font/a")[0].text()
+                    comic["pages_npictures"] = result.select("font/a")[2].text()
+                else:
+                    comic[d_keys[i]] = result.text()
+                i += 1
+            parse_result += [comic]
+            return parse_result
+
+        def search(self, search_term="", pages="", number_results=25 ):
+            # TODO: Add Batch search for comics.
+            g = grab.Grab()
+            request={"s":search_term, "p":pages}
+            if sys.version_info[0] < 3:
+                url = self.url+"?"+ \
+                        urllib.urlencode(request)
+            else:
+                url = self.url+"?"+ \
+                        urllib.parse.urlencode(request)
+            g.go(url)
+            search_result = []
+            nresults = re.search(r'([0-9]*) results',
+                                 g.doc.select("/html/body/font[1]").one().text())
+
+            nresults = int(nresults.group(1))
+            pages_to_load = int(math.ceil(number_results/25.0)) # Pages needed to be loaded
+            # Check if the pages needed to be loaded are more than the pages available
+            if pages_to_load > int(math.ceil(nresults/25.0)):
+                pages_to_load = int(math.ceil(nresults/25.0))
+            for page in range(1, pages_to_load+1):
+                if len(search_result) > number_results:  # Check if we got all the results
+                    break
+                url = ""
+                request.update({"page":page})
+                if sys.version_info[0] < 3:
+                    url = self.url+"?"+ \
+                        urllib.urlencode(request)
+                else:
+                    url = self.url+"?"+ \
+                        urllib.parse.urlencode(request)
+                g.go(url)
+                search_result += self.__parse(g)
+                if page != pages_to_load:
+                    # Random delay because if you ask a lot of pages,your ip might get blocked.
+                    time.sleep(random.randint(250, 1000)/1000.0)
+            return search_result[:number_results]
+
     def __init__(self, mirrors=None):
         self.mirrors = mirrors
         self.__selected_mirror = None
@@ -334,6 +414,8 @@ class Libgenapi(object):
                         self.scimag = self.__Scimag(g.make_url_absolute(category.getnext().attrib["href"]))
                     elif category.attrib["value"] == "fiction":
                         self.fiction = self.__Fiction(g.make_url_absolute(category.getnext().attrib["href"]))
+                    elif category.attrib["value"] == "comics":
+                        self.comics = self.__Comics(g.make_url_absolute(category.getnext().attrib["href"]))
                 break
             except grab.GrabError:
                 if i == last:
