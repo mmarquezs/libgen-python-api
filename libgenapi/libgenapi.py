@@ -154,7 +154,7 @@ class Libgenapi(object):
                     article = {"doi":None, "author":None, "article":None, "doi_owner":None, "journal":None,
                        "issue":{"year":None, "month":None, "day":None, "volume":None, "issue":None, "first_page":None, "last_page":None}, "issn":None, "size":None, "mirrors":[]}
                 if d_keys[i] == "doi_and_mirrors":            # Getting doi and mirrors links
-                    article["doi"]=result.select("table/tr[1]/td[2]/nobr").text()
+                    article["doi"]=result.select("table/tr[1]/td[2]").text()
                     mirrors = result.select("table/tr//a/@href")
                     for mirror in mirrors:
                         article["mirrors"] += [g.make_url_absolute(mirror.text())]
