@@ -136,8 +136,9 @@ class Libgenapi(object):
                     urllib.parse.urlencode(request)
         self.grabber.go(url)
         search_result = []
-        nbooks = re.search(r'([0-9]*) books',
-                           self.grabber.doc.select("/html/body/table[2]/tr/td[1]/font").text())
+        nbooks = re.search(r'([0-9]*) (books|files)',
+                           self.grabber.doc.select(
+                               "/html/body/table[2]/tr/td[1]/font").text())
         nbooks = int(nbooks.group(1))
         pages_to_load = int(math.ceil(number_results/25.0)) # Pages needed to be loaded
         # Check if the pages needed to be loaded are more than the pages available
