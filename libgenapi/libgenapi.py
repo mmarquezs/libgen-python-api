@@ -9,21 +9,25 @@ import re
 import math
 import sys
 import urllib
-if sys.version_info[0] > 3:
-    import urllib.parse
 import grab
 import weblib
+if sys.version_info[0] > 3:
+    import urllib.parse
+
 
 class MissingMirrorsError(Exception):
     """
     Error shown when there are no mirrors.
     """
     pass
+
+
 class MirrorsNotResolvingError(Exception):
     """
     Error shown when none of the mirrors are resolving.
     """
     pass
+
 
 class Libgenapi(object):
     """
@@ -33,11 +37,13 @@ class Libgenapi(object):
         self.grabber = grab.Grab()
         self.mirrors = mirrors
         self.__selected_mirror = None
+
     def set_mirrors(self, list_mirrors):
         """
         Sets the mirrors of Libgen Genesis
         """
         self.mirrors = list_mirrors
+
     def __choose_mirror(self):
         if self.__selected_mirror is not None:
             return
@@ -60,6 +66,7 @@ class Libgenapi(object):
                 if i == last:
                     raise MirrorsNotResolvingError("None of the mirrors are resolving, check" + \
                                                    "if they are correct or you have connection!")
+
     def __parse_books(self):
         book = {"author":None, "series":None, "title":None, "edition":None, "isbn":None,
                 "publisher":None, "year":None, "pages":None, "language":None, "size":None,
@@ -69,7 +76,7 @@ class Libgenapi(object):
                   "language", "size", "extension", "mirror","mirror","mirror","mirror"]
         parse_result = []
         for result in self.grabber.doc.select('//body/table[3]/tr[position()>1]/td[position()>1'+ \
-                                              'and position()<last()]'):
+                                              'and position()<14]'):
             if i > len(d_keys)-1:
                 parse_result += [book]
                 i = 0
@@ -99,11 +106,11 @@ class Libgenapi(object):
                                           "(([0-9Xx][- ]*){13}|([0-9Xx][- ]*){10})")
                     reg_edition = re.compile(r'(\[[0-9] ed\.\])')
                     for element in green_text:
-                        if reg_isbn.search(element.text()) != None:  # isbn found
+                        if reg_isbn.search(element.text()) is not None:  # isbn found
                             book["isbn"] = [reg_isbn.search(_).group(0)
                                             for _ in element.text().split(",")
-                                            if reg_isbn.search(_) != None]
-                        elif reg_edition.search(element.text()) != None:  # edition found
+                                            if reg_isbn.search(_) is not None]
+                        elif reg_edition.search(element.text()) is not None:  # edition found
                             book["edition"] = element.text()
                         else:   # Series found
                             book["series"] = element.text()
@@ -114,16 +121,18 @@ class Libgenapi(object):
             i += 1
         parse_result += [book]
         return parse_result
+
     def search(self, search_term, column="title", number_results=25):
         """
-        TODO: Add documentation
+        TODO:
+        Add documentation
         DONE -> Search multiple pages untile the number_results is meet or the end.
-        TODO: Check for strange encodings, other langauges chinese,etc..
-        TODO: Simplify,simplify,simply...For exemple the book dictionary should
-        start with all keys with an empty string.
-        TODO: Change the actual output to json?
-        TODO: Make a example terminal app that uses it
-        TODO: STARTED -> Add parameters to the search apart from the search_term
+        Check for strange encodings, other langauges chinese,etc..
+        Simplify,simplify,simply...For exemple the book dictionary
+        should start with all keys with an empty string.
+        Change the actual output to json?
+        Make a example terminal app that uses it
+        STARTED -> Add parameters to the search apart from the search_term
         """
         request={"req":search_term,"column":column}
         self.__choose_mirror()
@@ -135,8 +144,9 @@ class Libgenapi(object):
                     urllib.parse.urlencode(request)
         self.grabber.go(url)
         search_result = []
-        nbooks = re.search(r'([0-9]*) books',
-                           self.grabber.doc.select("/html/body/table[2]/tr/td[1]/font").text())
+        nbooks = re.search(r'([0-9]*) (books|files)',
+                           self.grabber.doc.select(
+                               "/html/body/table[2]/tr/td[1]/font").text())
         nbooks = int(nbooks.group(1))
         pages_to_load = int(math.ceil(number_results/25.0)) # Pages needed to be loaded
         # Check if the pages needed to be loaded are more than the pages available
@@ -146,7 +156,7 @@ class Libgenapi(object):
             if len(search_result) > number_results:  # Check if we got all the results
                 break
             url = ""
-            request.update({"page":page})
+            request.update({"page": page})
             if sys.version_info[0] < 3:
                 url = self.__selected_mirror+"/search.php?"+ \
                       urllib.urlencode(request)
