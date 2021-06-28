@@ -26,18 +26,18 @@ Then the results are something like this (but... without the crazyness :P real l
 
         [
             {
-                "author":"Dat Guy",
-                "series":"Library of New Guy Studies volume 420",
-                "title":"Dat perfect 5/7 Title !",
+                "author":"Mr. Aut Hor",
+                "series":"Books Volume N.1",
+                "title":"The Title",
                 "isbn":[123456],
                 "edition":"[1 ed.]",
-                "publisher":"WHo knows? Me no!",
-                "year":"420",
-                "pages":"420",
-                "language":"chan",
-                "size":"420 kb",
-                "extension":"vap",
-                "mirrors":["http://IDontWantADMCA.takedown/view.php?id=1337HAYKER",
+                "publisher":"Best Books S.L",
+                "year":"1972",
+                "pages":"1337",
+                "language":"en",
+                "size":"12,345 kb",
+                "extension":"pdf",
+                "mirrors":["http://IDontWantADMCA.takedown/view.php?id=123456",
                          "http://IDontWantADMCA.takedown/ads.php?md5=MD5HERE",
                          "http://IDontWantADMCA.takedown/md5/MD5HERE",
                          "http://IDontWantADMCA.takedown/md5/MD5HERE"
