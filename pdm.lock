@@ -507,7 +507,7 @@ summary = "Module for decorators, wrappers and monkey patching."
 
 [metadata]
 lock_version = "3.1"
-content_hash = "sha256:18de55654e1ff21fbbcfcf2b8d80f4e76ecd4c774dcbe2d37b244420240bc876"
+content_hash = "sha256:83845fc7847b83cd81b28a0a0a5d52c023c321d88b04461c7f1ccb0abc2a03d1"
 
 [metadata.files]
 "astor 0.8.1" = [

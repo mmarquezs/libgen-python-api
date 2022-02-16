@@ -1,22 +1,20 @@
 [project]
 name = "libgenapi"
-version = "2.0.0"
+version = "2.0a0"
 description = ""
 authors = [
     {name = "Marc Marquez Santamaria", email = "mmsa1994@gmail.com"},
 ]
 dependencies = [
-    "beautifulsoup4>=4.10.0",
     "requests>=2.27.1",
     "lxml>=4.7.1",
     "urllib3>=1.26.8",
-    "lxml-stubs>=0.3.1",
-]
+    "lxml-stubs>=0.3.1"]
 requires-python = ">=3.8"
 license = {text = "MIT"}
 
 [project.urls]
-homepage = ""
+homepage = "https://github.com/mmarquezs/libgen-python-api"
 
 [project.optional-dependencies]
 [tool]
