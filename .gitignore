@@ -8,3 +8,9 @@
 /tests/#*#
 /libgenapi.egg-info/*
 dist/*
+########################
+#PDM Ignored files Start
+.pdm.toml
+__pypackages__/
+#PDF Ignored Files End
+########################

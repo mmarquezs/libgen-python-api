@@ -1,0 +1,12 @@
+{
+    "folders": [{"path": "."}],
+    "settings": {
+        "python.autoComplete.extraPaths": ["${workspaceFolder}/__pypackages__/3.10/lib"],
+        "python.analysis.extraPaths": ["${workspaceFolder}/__pypackages__/3.10/lib"],
+        "editor.tabSize": 4,
+        "editor.bracketPairColorization.enabled": true,
+        "python.formatting.provider": "black",
+        "python.linting.flake8Enabled": true,
+        "python.linting.enabled": true
+    },
+}
