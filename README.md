@@ -6,6 +6,10 @@ Requirements:
 * Python 2/3
 * Grab library and it's dependencies.
 
+Libgen Mirrors where it has worked in the past
+---------------------------------------------
+* libgen.rs
+
 Installation:
 -------------
 Two options:
